@@ -11,14 +11,10 @@ export class TrackerService {
     }
 
     private async getHeaders(response:Response):Promise<string> {
-        const cookieHeaders =
-            response.headers
-                .get('set-cookie')
-                ?.split(',')
-                .map((cookieString) => cookieString.trim())
-                .map((cookieString) => Cookie.parse(cookieString))
-                .map((cookie) => cookie?.cookieString() ?? null)
+        const cookieHeaders = response.headers.get('set-cookie')?.split(',').map((cookieString) => cookieString.trim())
+                .map((cookieString) => Cookie.parse(cookieString)).map((cookie) => cookie?.cookieString() ?? null)
                 .join('; ') ?? null;
+                
         return cookieHeaders;
     } 
 
@@ -44,11 +40,7 @@ export class TrackerService {
   }
 
   private async getParams(waybillNumber: string, csrf: string): Promise<string> {
-    const queryString = new URLSearchParams({
-      paramInvcNo: waybillNumber,
-      _csrf: csrf,
-    }).toString();
-
+    const queryString = new URLSearchParams({paramInvcNo: waybillNumber, _csrf: csrf}).toString();
     return queryString;
   }
 
