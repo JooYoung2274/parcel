@@ -1,9 +1,9 @@
-
 import axios from 'axios';
 import { URLSearchParams } from 'url';
 import { Cookie } from 'tough-cookie';
 import * as cheerio from 'cheerio';
-import { PARCEL_URL,  VIEW_INPUT } from './tracker.constants';
+import { PARCEL_URL, VIEW_INPUT } from './tracker.constants';
+import { BadRequestException } from '@nestjs/common';
 
 export class TrackerService {
     private async mainPageFetch() {
@@ -39,7 +39,7 @@ export class TrackerService {
 
       return { csrf, cookieHeaders };
     } catch (error) {
-      throw new Error(error.message);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -54,7 +54,7 @@ export class TrackerService {
 
   async parcelTracker(waybillNumber: string, csrf: string, cookieHeaders: any) {
     if (!(waybillNumber.length === 12 || waybillNumber.length === 10)) {
-      throw new Error('waybillNumber is invalid');
+      throw new BadRequestException('waybillNumber is invalid');
     }
 
    const queryString = await this.getParams(waybillNumber, csrf);
@@ -70,8 +70,8 @@ export class TrackerService {
     );
 
     if (!res?.data?.parcelResultMap?.resultList.length) {
-      throw new Error(`${waybillNumber} ::: not found`);
+      throw new BadRequestException(`${waybillNumber} ::: not found`);
     }
-    return res?.data
+    return res.data
   }
 }
