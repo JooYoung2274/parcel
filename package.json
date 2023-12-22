@@ -1,6 +1,6 @@
 {
-  "name": "parcel-tracker4",
-  "version": "0.0.4",
+  "name": "parcel-info",
+  "version": "0.0.1",
   "description": "",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -19,5 +19,5 @@
     "@types/tough-cookie": "^4.0.5"
   },
   "author": "",
-  "license": ""
+  "license": "ISC"
 }
