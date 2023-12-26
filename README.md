@@ -24,6 +24,8 @@ const trackerService = new TrackerService();
 
 const { csrf, cookieHeaders } = await this.trackerService.optionSetting();
 
-const data = await this.trackerService.parcelTracker(waybill.number, csrf, cookieHeaders);
+const data = await this.trackerService.parcelTracker(WAYBILL_NUMBER, csrf, cookieHeaders);
+
+// WAYBILL_NUMBER -> CJ 운송장 번호
 
 ```
