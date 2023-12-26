@@ -11,40 +11,40 @@ class TrackerService {
     async mainPageFetch() {
         return await fetch(tracker_constants_1.PARCEL_URL.MAIN);
     }
-    async getHeaders(response) {
-        const cookieHeaders = response.headers.get('set-cookie')?.split(',').map((cookieString) => cookieString.trim())
+    async getOption1(response) {
+        const option1 = response.headers.get('set-cookie')?.split(',').map((cookieString) => cookieString.trim())
             .map((cookieString) => tough_cookie_1.Cookie.parse(cookieString)).map((cookie) => cookie?.cookieString() ?? null)
             .join('; ') ?? null;
-        return cookieHeaders;
+        return option1;
     }
-    async getCsrf(response) {
+    async getOption2(response) {
         const view = cheerio.load(await response.text());
-        const csrf = view(tracker_constants_1.VIEW_INPUT.DATA).val();
-        return csrf;
+        const option2 = view(tracker_constants_1.VIEW_INPUT.DATA).val();
+        return option2;
     }
     async optionSetting() {
         try {
             const mainPageResponse = await this.mainPageFetch();
-            const cookieHeaders = await this.getHeaders(mainPageResponse);
-            const csrf = await this.getCsrf(mainPageResponse);
-            return { csrf, cookieHeaders };
+            const option1 = await this.getOption1(mainPageResponse);
+            const option2 = await this.getOption2(mainPageResponse);
+            return { option2, option1 };
         }
         catch (error) {
             throw new common_1.BadRequestException(error.message);
         }
     }
-    async getParams(waybillNumber, csrf) {
-        const queryString = new url_1.URLSearchParams({ paramInvcNo: waybillNumber, _csrf: csrf }).toString();
+    async getParams(waybillNumber, option2) {
+        const queryString = new url_1.URLSearchParams({ paramInvcNo: waybillNumber, _csrf: option2 }).toString();
         return queryString;
     }
-    async parcelTracker(waybillNumber, csrf, cookieHeaders) {
+    async parcelTracker(waybillNumber, option2, option1) {
         if (!(waybillNumber.length === 12 || waybillNumber.length === 10)) {
             throw new common_1.BadRequestException('waybillNumber is invalid');
         }
-        const queryString = await this.getParams(waybillNumber, csrf);
+        const queryString = await this.getParams(waybillNumber, option2);
         const res = await axios_1.default.post(`${tracker_constants_1.PARCEL_URL.DETAIL}?${queryString}`, {}, {
             headers: {
-                cookie: cookieHeaders,
+                cookie: option1,
             },
         });
         if (!res?.data?.parcelResultMap?.resultList.length) {

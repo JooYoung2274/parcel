@@ -8,9 +8,9 @@ npm install parcel-info
 ```
 
 - optionSetting() 
-    - headers, query-options 리턴
+    - option1, option2 리턴
 
-- parcelTracker(waybillNumber: string, csrf: string, cookieHeaders: any)
+- parcelTracker(waybillNumber: string, option2: string, option1: any)
     - 조회할 운송장 번호, optionSetting()에서 리턴받은 데이터들 입력
 
 
@@ -22,10 +22,10 @@ import { TrackerService } from 'parcel-info';
 
 const trackerService = new TrackerService();
 
-const { csrf, cookieHeaders } = await this.trackerService.optionSetting();
+const { option1, option2 } = await this.trackerService.optionSetting()
 
-const data = await this.trackerService.parcelTracker(WAYBILL_NUMBER, csrf, cookieHeaders);
+const data = await this.trackerService.parcelTracker(WAYBILL_NUMBER, option2, option1);
 
-// WAYBILL_NUMBER -> CJ 운송장 번호
+// WAYBILL_NUMBER -> 운송장 번호
 
 ```

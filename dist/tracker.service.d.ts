@@ -1,11 +1,11 @@
 export declare class TrackerService {
     private mainPageFetch;
-    private getHeaders;
-    private getCsrf;
+    private getOption1;
+    private getOption2;
     optionSetting(): Promise<{
-        csrf: string;
-        cookieHeaders: string;
+        option1: string;
+        option2: string;
     }>;
     private getParams;
-    parcelTracker(waybillNumber: string, csrf: string, cookieHeaders: any): Promise<any>;
+    parcelTracker(waybillNumber: string, option2: string, option1: any): Promise<any>;
 }
