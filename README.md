@@ -12,3 +12,18 @@ npm install parcel-info
 
 - parcelTracker(waybillNumber: string, csrf: string, cookieHeaders: any)
     - 조회할 운송장 번호, optionSetting()에서 리턴받은 데이터들 입력
+
+
+### EXAMPLE
+
+```typescript
+
+import { TrackerService } from 'parcel-info';
+
+const trackerService = new TrackerService();
+
+const { csrf, cookieHeaders } = await this.trackerService.optionSetting();
+
+const data = await this.trackerService.parcelTracker(waybill.number, csrf, cookieHeaders);
+
+```
