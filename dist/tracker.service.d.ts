@@ -1,11 +1,16 @@
+import { TrackerOptionsService } from './tracker-options.service';
 export declare class TrackerService {
-    private mainPageFetch;
-    private getOption1;
-    private getOption2;
-    optionSetting(): Promise<{
-        option1: string;
-        option2: string;
-    }>;
+    private options;
+    trackerOptionsService: TrackerOptionsService;
+    private option1;
+    private option2;
+    private waybillNumber;
+    private axios;
+    constructor(options: {
+        rateLimit: number;
+    });
+    axiosSetting(MAX_RETRY_COUNT: number): Promise<void>;
     private getParams;
-    parcelTracker(waybillNumber: string, option2: string, option1: any): Promise<any>;
+    parcelTracker(waybillNumber: string): Promise<any>;
+    parcelListTracker(waybillNumberList: string[]): Promise<any[]>;
 }

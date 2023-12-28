@@ -1,57 +1,100 @@
 "use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TrackerService = void 0;
+const common_1 = require("@nestjs/common");
 const axios_1 = require("axios");
 const url_1 = require("url");
-const tough_cookie_1 = require("tough-cookie");
-const cheerio = require("cheerio");
 const tracker_constants_1 = require("./tracker.constants");
-const common_1 = require("@nestjs/common");
-class TrackerService {
-    async mainPageFetch() {
-        return await fetch(tracker_constants_1.PARCEL_URL.MAIN);
+const tracker_options_service_1 = require("./tracker-options.service");
+let TrackerService = class TrackerService {
+    constructor(options) {
+        this.options = options;
+        this.trackerOptionsService = new tracker_options_service_1.TrackerOptionsService();
+        this.trackerOptionsService.optionSetting().then((options) => {
+            this.option1 = options.option1;
+            this.option2 = options.option2;
+        });
+        this.axiosSetting(this.options.rateLimit);
     }
-    async getOption1(response) {
-        const option1 = response.headers.get('set-cookie')?.split(',').map((cookieString) => cookieString.trim())
-            .map((cookieString) => tough_cookie_1.Cookie.parse(cookieString)).map((cookie) => cookie?.cookieString() ?? null)
-            .join('; ') ?? null;
-        return option1;
+    async axiosSetting(MAX_RETRY_COUNT) {
+        this.axios = axios_1.default.create();
+        this.axios.interceptors.response.use(undefined, async (error) => {
+            const config = error.config;
+            config.retryCount = config.retryCount ?? 0;
+            const shouldRetry = config.retryCount < MAX_RETRY_COUNT;
+            if (shouldRetry) {
+                const { option1, option2 } = await this.trackerOptionsService.optionSetting();
+                this.option1 = option1;
+                this.option2 = option2;
+                const queryString = await this.getParams();
+                config.url = `${tracker_constants_1.PARCEL_URL.DETAIL}?${queryString}`;
+                config.headers = {
+                    cookie: this.option1,
+                };
+                config.retryCount += 1;
+                return this.axios.request(config);
+            }
+            return Promise.reject(error);
+        });
     }
-    async getOption2(response) {
-        const view = cheerio.load(await response.text());
-        const option2 = view(tracker_constants_1.VIEW_INPUT.DATA).val();
-        return option2;
-    }
-    async optionSetting() {
-        try {
-            const mainPageResponse = await this.mainPageFetch();
-            const option1 = await this.getOption1(mainPageResponse);
-            const option2 = await this.getOption2(mainPageResponse);
-            return { option2, option1 };
-        }
-        catch (error) {
-            throw new common_1.BadRequestException(error.message);
-        }
-    }
-    async getParams(waybillNumber, option2) {
-        const queryString = new url_1.URLSearchParams({ paramInvcNo: waybillNumber, _csrf: option2 }).toString();
+    async getParams() {
+        const queryString = new url_1.URLSearchParams({ paramInvcNo: this.waybillNumber, _csrf: this.option2 }).toString();
         return queryString;
     }
-    async parcelTracker(waybillNumber, option2, option1) {
-        if (!(waybillNumber.length === 12 || waybillNumber.length === 10)) {
+    async parcelTracker(waybillNumber) {
+        this.option1 = this.option1 + '123';
+        this.waybillNumber = waybillNumber;
+        if (!(this.waybillNumber.length === 12 || this.waybillNumber.length === 10)) {
             throw new common_1.BadRequestException('waybillNumber is invalid');
         }
-        const queryString = await this.getParams(waybillNumber, option2);
-        const res = await axios_1.default.post(`${tracker_constants_1.PARCEL_URL.DETAIL}?${queryString}`, {}, {
+        const queryString = await this.getParams();
+        const res = await this.axios.request({
+            url: `${tracker_constants_1.PARCEL_URL.DETAIL}?${queryString}`,
+            method: 'POST',
             headers: {
-                cookie: option1,
+                cookie: this.option1,
             },
         });
         if (!res?.data?.parcelResultMap?.resultList.length) {
-            throw new common_1.BadRequestException(`${waybillNumber} ::: not found`);
+            throw new common_1.BadRequestException(`${this.waybillNumber} ::: not found`);
         }
         return res.data;
     }
-}
+    async parcelListTracker(waybillNumberList) {
+        let result = [];
+        for (let i = 0; i < waybillNumberList.length; i++) {
+            this.waybillNumber = waybillNumberList[i];
+            if (!(this.waybillNumber.length === 12 || this.waybillNumber.length === 10)) {
+                throw new common_1.BadRequestException('waybillNumber is invalid');
+            }
+            const queryString = await this.getParams();
+            const res = await this.axios.request({
+                url: `${tracker_constants_1.PARCEL_URL.DETAIL}?${queryString}`,
+                method: 'POST',
+                headers: {
+                    cookie: this.option1,
+                },
+            });
+            if (!res?.data?.parcelResultMap?.resultList.length) {
+                throw new common_1.BadRequestException(`${this.waybillNumber} ::: not found`);
+            }
+            result.push(res.data);
+        }
+        return result;
+    }
+};
+TrackerService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [Object])
+], TrackerService);
 exports.TrackerService = TrackerService;
 //# sourceMappingURL=tracker.service.js.map

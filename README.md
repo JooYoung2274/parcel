@@ -1,31 +1,61 @@
-## 택배 운송장 번호 조회
+## 택배조회
 
-- npm 배포 테스트용 입니다. npm에 없을수도 있습니다.
+- 택배조회 관련 라이브러리 입니다.
+- npm 테스트용이라 npm에 없을수도 있습니다.
 
+### INSTALL
+
+```bash
+$ npm install parcel-data
 ```
-// INSTALL
-npm install parcel-info
-```
-
-- optionSetting() 
-    - option1, option2 리턴
-
-- parcelTracker(waybillNumber: string, option2: string, option1: any)
-    - 조회할 운송장 번호, optionSetting()에서 리턴받은 데이터들 입력
-
 
 ### EXAMPLE
 
+#### module.ts
+
 ```typescript
+import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { TrackerModule } from 'parcel-data-test5';
 
-import { TrackerService } from 'parcel-info';
+@Module({
+  imports: [
+    TrackerModule.register({
+      rateLimit: 5, // api 실패 시 재요청 limit
+    }),
+  ],
+  controllers: [AppController],
+  providers: [AppService],
+})
+export class AppModule {}
+```
 
-const trackerService = new TrackerService();
+#### service.ts
 
-const { option1, option2 } = await this.trackerService.optionSetting()
+```typescript
+import { Injectable } from '@nestjs/common';
+import { TrackerService } from 'parcel-data-test5';
 
-const data = await this.trackerService.parcelTracker(WAYBILL_NUMBER, option2, option1);
+@Injectable()
+export class AppService {
+  constructor(private trackerService: TrackerService) {}
 
-// WAYBILL_NUMBER -> 운송장 번호
+  async getParcelData(waybillNumber: string): Promise<PRACEL_RETURN_TYPE> {
+    const result = await this.trackerService.parcelTracker(waybillNumber);
+    return result;
+  }
 
+  async getParcelListData(waybillNumberList: string[]): Promise<PRACEL_RETURN_TYPE[]> {
+    const result = await this.trackerService.parcelListTracker(waybillNumberList);
+    return result;
+  }
+}
+```
+
+### METHOD
+
+```typescript
+parcelTracker(waybillNumber: string): Promise<PARCEL_RETURN_TYPE>
+parcelListTracker(waybillNumberList: string[]): Promise<PARCEL_RETURN_TYPE[]>
 ```
