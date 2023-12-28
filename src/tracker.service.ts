@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import Axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios';
 import { URLSearchParams } from 'url';
-import { PARCEL_URL, TrackMoudleOptions } from './tracker.constants';
+import { PARCEL_LIST_RETURN_TYPE, PARCEL_RETURN_TYPE, PARCEL_URL, TRACK_MODULE_OPTIONS } from './tracker.constants';
 import { TrackerOptionsService } from './tracker-options.service';
 
 interface AxiosCustomRequestConfig extends AxiosRequestConfig {
@@ -15,7 +15,8 @@ export class TrackerService {
   private option2: string;
   private waybillNumber: string;
   private axios: AxiosInstance;
-  constructor(private options: TrackMoudleOptions) {
+
+  constructor(private options: TRACK_MODULE_OPTIONS) {
     this.trackerOptionsService.optionSetting().then((options) => {
       this.option1 = options.option1;
       this.option2 = options.option2;
@@ -55,10 +56,10 @@ export class TrackerService {
     return queryString;
   }
 
-  async parcelTracker(waybillNumber: string): Promise<any> {
+  async parcelTracker(waybillNumber: string): Promise<PARCEL_RETURN_TYPE> {
     this.waybillNumber = waybillNumber;
     if (!(this.waybillNumber.length === 12 || this.waybillNumber.length === 10)) {
-      throw new BadRequestException('waybillNumber is invalid');
+      throw new BadRequestException(`${this.waybillNumber} ::: waybillNumber is invalid (length == 10 | 12)`);
     }
     const queryString = await this.getParams();
 
@@ -71,17 +72,22 @@ export class TrackerService {
     });
 
     if (!res?.data?.parcelResultMap?.resultList.length) {
-      throw new BadRequestException(`${this.waybillNumber} ::: not found`);
+      throw new BadRequestException(`${this.waybillNumber} ::: waybillNumber not found`);
     }
     return res.data;
   }
 
-  async parcelListTracker(waybillNumberList: string[]): Promise<any[]> {
+  async parcelListTracker(waybillNumberList: string[]): Promise<PARCEL_LIST_RETURN_TYPE> {
     let result = [];
+    let invalidWaybillNumber = [];
     for (let i = 0; i < waybillNumberList.length; i++) {
       this.waybillNumber = waybillNumberList[i];
       if (!(this.waybillNumber.length === 12 || this.waybillNumber.length === 10)) {
-        throw new BadRequestException('waybillNumber is invalid');
+        invalidWaybillNumber.push({
+          waybillNumber: this.waybillNumber,
+          message: 'waybillNumber is invalid (length == 10 | 12)',
+        });
+        continue;
       }
 
       const queryString = await this.getParams();
@@ -94,10 +100,14 @@ export class TrackerService {
         },
       });
       if (!res?.data?.parcelResultMap?.resultList.length) {
-        throw new BadRequestException(`${this.waybillNumber} ::: not found`);
+        invalidWaybillNumber.push({
+          waybillNumber: this.waybillNumber,
+          message: 'waybillNumber not found',
+        });
+        continue;
       }
       result.push(res.data);
     }
-    return result;
+    return { result, invalidWaybillNumber };
   }
 }

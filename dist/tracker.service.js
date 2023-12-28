@@ -53,7 +53,7 @@ let TrackerService = class TrackerService {
     async parcelTracker(waybillNumber) {
         this.waybillNumber = waybillNumber;
         if (!(this.waybillNumber.length === 12 || this.waybillNumber.length === 10)) {
-            throw new common_1.BadRequestException('waybillNumber is invalid');
+            throw new common_1.BadRequestException(`${this.waybillNumber} ::: waybillNumber is invalid (length == 10 | 12)`);
         }
         const queryString = await this.getParams();
         const res = await this.axios.request({
@@ -64,16 +64,21 @@ let TrackerService = class TrackerService {
             },
         });
         if (!res?.data?.parcelResultMap?.resultList.length) {
-            throw new common_1.BadRequestException(`${this.waybillNumber} ::: not found`);
+            throw new common_1.BadRequestException(`${this.waybillNumber} ::: waybillNumber not found`);
         }
         return res.data;
     }
     async parcelListTracker(waybillNumberList) {
         let result = [];
+        let invalidWaybillNumber = [];
         for (let i = 0; i < waybillNumberList.length; i++) {
             this.waybillNumber = waybillNumberList[i];
             if (!(this.waybillNumber.length === 12 || this.waybillNumber.length === 10)) {
-                throw new common_1.BadRequestException('waybillNumber is invalid');
+                invalidWaybillNumber.push({
+                    waybillNumber: this.waybillNumber,
+                    message: 'waybillNumber is invalid (length == 10 | 12)',
+                });
+                continue;
             }
             const queryString = await this.getParams();
             const res = await this.axios.request({
@@ -84,11 +89,15 @@ let TrackerService = class TrackerService {
                 },
             });
             if (!res?.data?.parcelResultMap?.resultList.length) {
-                throw new common_1.BadRequestException(`${this.waybillNumber} ::: not found`);
+                invalidWaybillNumber.push({
+                    waybillNumber: this.waybillNumber,
+                    message: 'waybillNumber not found',
+                });
+                continue;
             }
             result.push(res.data);
         }
-        return result;
+        return { result, invalidWaybillNumber };
     }
 };
 TrackerService = __decorate([

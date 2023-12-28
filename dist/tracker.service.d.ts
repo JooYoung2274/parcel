@@ -1,16 +1,14 @@
-import { TrackerOptionsService } from './tracker-options.service';
+import { PARCEL_LIST_RETURN_TYPE, PARCEL_RETURN_TYPE, TRACK_MODULE_OPTIONS } from './tracker.constants';
 export declare class TrackerService {
     private options;
-    trackerOptionsService: TrackerOptionsService;
+    private trackerOptionsService;
     private option1;
     private option2;
     private waybillNumber;
     private axios;
-    constructor(options: {
-        rateLimit: number;
-    });
+    constructor(options: TRACK_MODULE_OPTIONS);
     axiosSetting(MAX_RETRY_COUNT: number): Promise<void>;
     private getParams;
-    parcelTracker(waybillNumber: string): Promise<any>;
-    parcelListTracker(waybillNumberList: string[]): Promise<any[]>;
+    parcelTracker(waybillNumber: string): Promise<PARCEL_RETURN_TYPE>;
+    parcelListTracker(waybillNumberList: string[]): Promise<PARCEL_LIST_RETURN_TYPE>;
 }
