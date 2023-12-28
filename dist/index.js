@@ -12,6 +12,5 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./tracker.service"), exports);
 __exportStar(require("./tracker.module"), exports);
-__exportStar(require("./tracker-options.service"), exports);
 __exportStar(require("./tracker.constants"), exports);
 //# sourceMappingURL=index.js.map

@@ -51,7 +51,6 @@ let TrackerService = class TrackerService {
         return queryString;
     }
     async parcelTracker(waybillNumber) {
-        this.option1 = this.option1 + '123';
         this.waybillNumber = waybillNumber;
         if (!(this.waybillNumber.length === 12 || this.waybillNumber.length === 10)) {
             throw new common_1.BadRequestException('waybillNumber is invalid');
