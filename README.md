@@ -108,3 +108,9 @@ type INVALID_WAYBILL_RETURN_TYPE = {
   message: string;
 };
 ```
+
+<br>
+
+## License
+
+This library is licensed under the MIT License.

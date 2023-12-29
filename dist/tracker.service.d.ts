@@ -7,7 +7,7 @@ export declare class TrackerService {
     private waybillNumber;
     private axios;
     constructor(options: TRACK_MODULE_OPTIONS);
-    axiosSetting(MAX_RETRY_COUNT: number): Promise<void>;
+    private axiosSetting;
     private getParams;
     parcelTracker(waybillNumber: string): Promise<PARCEL_RETURN_TYPE>;
     parcelListTracker(waybillNumberList: string[]): Promise<PARCEL_LIST_RETURN_TYPE>;

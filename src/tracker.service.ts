@@ -24,7 +24,7 @@ export class TrackerService {
     this.axiosSetting(this.options.rateLimit);
   }
 
-  async axiosSetting(MAX_RETRY_COUNT: number): Promise<void> {
+  private async axiosSetting(MAX_RETRY_COUNT: number): Promise<void> {
     this.axios = Axios.create();
     this.axios.interceptors.response.use(undefined, async (error: AxiosError) => {
       const config = error.config as AxiosCustomRequestConfig;
@@ -61,35 +61,8 @@ export class TrackerService {
     if (!(this.waybillNumber.length === 12 || this.waybillNumber.length === 10)) {
       throw new BadRequestException(`${this.waybillNumber} ::: waybillNumber is invalid (length == 10 | 12)`);
     }
-    const queryString = await this.getParams();
 
-    const res = await this.axios.request({
-      url: `${PARCEL_URL.DETAIL}?${queryString}`,
-      method: 'POST',
-      headers: {
-        cookie: this.option1,
-      },
-    });
-
-    if (!res?.data?.parcelResultMap?.resultList.length) {
-      throw new BadRequestException(`${this.waybillNumber} ::: waybillNumber not found`);
-    }
-    return res.data;
-  }
-
-  async parcelListTracker(waybillNumberList: string[]): Promise<PARCEL_LIST_RETURN_TYPE> {
-    let result = [];
-    let invalidWaybillNumber = [];
-    for (let i = 0; i < waybillNumberList.length; i++) {
-      this.waybillNumber = waybillNumberList[i];
-      if (!(this.waybillNumber.length === 12 || this.waybillNumber.length === 10)) {
-        invalidWaybillNumber.push({
-          waybillNumber: this.waybillNumber,
-          message: 'waybillNumber is invalid (length == 10 | 12)',
-        });
-        continue;
-      }
-
+    try {
       const queryString = await this.getParams();
 
       const res = await this.axios.request({
@@ -98,16 +71,54 @@ export class TrackerService {
         headers: {
           cookie: this.option1,
         },
+        timeout: 5000,
       });
+
       if (!res?.data?.parcelResultMap?.resultList.length) {
-        invalidWaybillNumber.push({
-          waybillNumber: this.waybillNumber,
-          message: 'waybillNumber not found',
-        });
-        continue;
+        throw new BadRequestException(`${this.waybillNumber} ::: waybillNumber not found`);
       }
-      result.push(res.data);
+      return res.data;
+    } catch (error) {
+      throw new BadRequestException(error.message);
     }
-    return { result, invalidWaybillNumber };
+  }
+
+  async parcelListTracker(waybillNumberList: string[]): Promise<PARCEL_LIST_RETURN_TYPE> {
+    let result = [];
+    let invalidWaybillNumber = [];
+    try {
+      for (let i = 0; i < waybillNumberList.length; i++) {
+        this.waybillNumber = waybillNumberList[i];
+        if (!(this.waybillNumber.length === 12 || this.waybillNumber.length === 10)) {
+          invalidWaybillNumber.push({
+            waybillNumber: this.waybillNumber,
+            message: 'waybillNumber is invalid (length == 10 | 12)',
+          });
+          continue;
+        }
+
+        const queryString = await this.getParams();
+
+        const res = await this.axios.request({
+          url: `${PARCEL_URL.DETAIL}?${queryString}`,
+          method: 'POST',
+          headers: {
+            cookie: this.option1,
+          },
+          timeout: 5000,
+        });
+        if (!res?.data?.parcelResultMap?.resultList.length) {
+          invalidWaybillNumber.push({
+            waybillNumber: this.waybillNumber,
+            message: 'waybillNumber not found',
+          });
+          continue;
+        }
+        result.push(res.data);
+      }
+      return { result, invalidWaybillNumber };
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 }
