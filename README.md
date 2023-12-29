@@ -1,4 +1,4 @@
-## 택배조회
+# parcel-data
 
 - 택배조회 관련 라이브러리 입니다.
 - npm 테스트용이라 npm에 없을수도 있습니다.
@@ -20,7 +20,7 @@ $ npm install parcel-data
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TrackerModule } from 'parcel-data-test5';
+import { TrackerModule } from 'parcel-data';
 
 @Module({
   imports: [
@@ -38,7 +38,7 @@ export class AppModule {}
 
 ```typescript
 import { Injectable } from '@nestjs/common';
-import { TrackerService } from 'parcel-data-test5';
+import { TrackerService } from 'parcel-data';
 
 @Injectable()
 export class AppService {
