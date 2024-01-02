@@ -14,36 +14,36 @@ export type TRACK_MODULE_OPTIONS = {
 export type PARCEL_RETURN_TYPE = {
   parcelResultMap: {
     resultList: {
-      invcNo: string;
-      sendrNm: string;
-      qty: string;
-      itemNm: string;
-      rcvrNm: string;
-      rgmailNo: string;
-      oriTrspbillnum: string;
-      rtnTrspbillnum: string;
-      nsDlvNm: string;
+      invcNo: string; // 운송장번호
+      sendrNm: string; // 보내는 분
+      qty: string; // 수량
+      itemNm: string; // 품목
+      rcvrNm: string; // 받는 분
+      rgmailNo: string; // 우편번호
+      oriTrspbillnum: string; // 원운송장번호
+      rtnTrspbillnum: string; // 반송장번호
+      nsDlvNm: string; // 택배사
     }[];
-    paramInvcNo: string;
+    paramInvcNo: string; // 운송장번호
   };
   parcelDetailResultMap: {
     resultList: {
-      nsDlvNm: string;
-      crgNm: string;
-      crgSt: string;
-      dTime: string;
-      empImgNm: string;
-      regBranId: string;
-      regBranNm: string;
-      scanNm: string;
+      nsDlvNm: string; // 택배사
+      crgNm: string; // 집하
+      crgSt: string; // 집하상태
+      dTime: string; // 집하일시
+      empImgNm: string; // 집하사원
+      regBranId: string; // 집하지점ID
+      regBranNm: string; // 집하지점명
+      scanNm: string; // 스캔
     }[];
-    paramInvcNo: string;
+    paramInvcNo: string; // 운송장번호
   };
 };
 
 export type INVALID_WAYBILL_RETURN_TYPE = {
-  waybillNumber: string;
-  message: string;
+  waybillNumber: string; // 운송장번호
+  message: string; // 메세지
 };
 
 export type PARCEL_LIST_RETURN_TYPE = {
